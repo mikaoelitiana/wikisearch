@@ -19,6 +19,7 @@ class Search {
 
     if ($q) {
       $this->_do_search($q);
+      $this->_sort_by_score();
     }
 
 		$f3->set('q', $q);
@@ -72,6 +73,17 @@ class Search {
       $this->articles[$content->pageid]->extract = isset($content->extract) ? $content->extract : "";
       $this->articles[$content->pageid]->score = isset($content->extract) ? $this->flesch_kincaid($content->extract) : 0;
     }
+  }
+
+  private function _sort_by_score() {
+    function cmp_scores($a, $b) {
+      if ($a->score == $b->score) {
+        return 0;
+      }
+      return ($a->score < $b->score) ? -1 : 1;
+    }
+
+    uasort($this->articles, 'cmp_scores');
   }
 }
 
