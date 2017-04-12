@@ -65,7 +65,7 @@ class Search {
   private function _get_extracts() {
     $ids = $this->_get_pages_ids();
 
-    $url = "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&format=json&exlimit=50&pageids=" . implode("|", $ids);
+    $url = "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&exsentences=10&explaintext&format=json&exlimit=50&pageids=" . implode("|", $ids);
 
     $extracts = $this->_query($url)->query->pages;
 
