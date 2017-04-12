@@ -43,7 +43,7 @@ class Search {
   }
 
   private function _do_search($q) {
-    $url = "https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:$q&format=json&cmlimit=5&explaintext";
+    $url = "https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:$q&format=json&cmlimit=50&explaintext";
 
     $this->articles = array_reduce(
       $this->_query($url)->query->categorymembers,
