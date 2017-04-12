@@ -30,7 +30,7 @@
 							Title
 						</th>
 						<th>
-							Score
+							Extract
 						</th>
 					</tr>
 				</thead>
@@ -39,16 +39,13 @@
           foreach ($articles as $article) : ?>
 					<tr>
 						<td>
-							<?php echo $i++; ?>
+							<?php echo $article->pageid; ?>
 						</td>
 						<td>
-							<?php echo $article->title ?>
+							<?php echo $article->title; ?>
 						</td>
 						<td>
-							01/04/2012
-						</td>
-						<td>
-							Default
+							<?php echo $article->extract; ?>
 						</td>
 					</tr>
           <?php endforeach; ?>

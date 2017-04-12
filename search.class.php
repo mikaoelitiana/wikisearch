@@ -1,31 +1,64 @@
 <?php
 class Search {
-  function render_search($f3) {
+  private $articles = [];
+
+  public function render_search($f3) {
     $q = $f3->get('GET.q');
-    $articles = [];
 
     if ($q) {
-      $articles = $this->do_search($q)->query->categorymembers;
+      $this->_do_search($q);
     }
 
 		$f3->set('q', $q);
-    $f3->set('articles', $articles);
+    $f3->set('articles', $this->articles);
 
     $f3->set('content','search.htm');
 		echo View::instance()->render('layout.htm');
   }
 
-  function do_search($q) {
-    $url = "https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:$q&format=json&cmlimit=50 ";
-
+  private function _query($url) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_URL, $url);
+
     $result = curl_exec($ch);
+
     curl_close($ch);
 
     return json_decode($result);
   }
 
+  private function _do_search($q) {
+    $url = "https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:$q&format=json&cmlimit=50&explaintext";
+
+    $this->articles = array_reduce(
+      $this->_query($url)->query->categorymembers,
+      function ($all, $item) {
+        $all[$item->pageid] = $item;
+        return $all;
+      });
+
+    $this->_get_extracts();
+  }
+
+  private function _get_pages_ids() {
+    function _get_article_id($article) {
+      return $article->pageid;
+    }
+    return array_map('_get_article_id', $this->articles);
+  }
+
+  private function _get_extracts() {
+    $ids = $this->_get_pages_ids();
+
+    $url = "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&format=json&pageids=" . implode("|", $ids);
+
+    $extracts = $this->_query($url)->query->pages;
+
+    foreach($extracts as $id => $content) {
+      $this->articles[$content->pageid]->extract = isset($content->extract) ? $content->extract : "";
+    }
+  }
 }
+
