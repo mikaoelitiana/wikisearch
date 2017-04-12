@@ -43,7 +43,7 @@ class Search {
   }
 
   private function _do_search($q) {
-    $url = "https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:$q&format=json&cmlimit=50&explaintext";
+    $url = "https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:$q&format=json&cmlimit=50&cmtype=page";
 
     $this->articles = array_reduce(
       $this->_query($url)->query->categorymembers,
@@ -65,13 +65,13 @@ class Search {
   private function _get_extracts() {
     $ids = $this->_get_pages_ids();
 
-    $url = "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&format=json&pageids=" . implode("|", $ids);
+    $url = "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&format=json&exlimit=50&pageids=" . implode("|", $ids);
 
     $extracts = $this->_query($url)->query->pages;
 
     foreach($extracts as $id => $content) {
       $this->articles[$content->pageid]->extract = isset($content->extract) ? $content->extract : "";
-      $this->articles[$content->pageid]->score = isset($content->extract) ? $this->flesch_kincaid($content->extract) : 0;
+      $this->articles[$content->pageid]->score = isset($content->extract) && $content->extract ? $this->flesch_kincaid($content->extract) : 0;
     }
   }
 
