@@ -2,6 +2,8 @@
 
 This search tool allows you to find articles in a given category. The restults are sorted by introduction text readability, from lowest to highest. The Flesch-Kincaid readability formula is used to give a score for each article.
 
+![Screenshot](screenshot.png)
+
 ## Run the project in localhost
 
 To start the project in localhost, we can use PHP built-in server : 
