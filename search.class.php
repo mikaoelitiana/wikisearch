@@ -1,18 +1,6 @@
 <?php
 class Search {
   private $articles = [];
-  private $textStatistics;
-
-  private function flesch_kincaid($text) {
-    $total_words = str_word_count($text);
-    $total_sentences = preg_match_all('/[.!?\r]/', $text, $tmp );
-    $total_syllables = preg_match_all('/[aeiouy]/', $text, $tmp );
-
-    $reading_ease = 206.835 - 1.015 * ($total_words/$total_sentences) - 84.6 * ($total_syllables/$total_words);
-    $reading_grade = 0.39 * ($total_words/$total_sentences) + 11.8 * ($total_syllables/$total_words) - 15.59;
-
-    return $reading_ease;
-  }
 
   public function render_search($f3) {
     $q = $f3->get('GET.q');
@@ -71,7 +59,7 @@ class Search {
 
     foreach($extracts as $id => $content) {
       $this->articles[$content->pageid]->extract = isset($content->extract) ? $content->extract : "";
-      $this->articles[$content->pageid]->score = isset($content->extract) && $content->extract ? $this->flesch_kincaid($content->extract) : 0;
+      $this->articles[$content->pageid]->score = isset($content->extract) && $content->extract ? $this->_flesch_kincaid($content->extract) : 0;
     }
   }
 
@@ -84,6 +72,17 @@ class Search {
     }
 
     uasort($this->articles, 'cmp_scores');
+  }
+
+  private function _flesch_kincaid($text) {
+    $total_words = str_word_count($text);
+    $total_sentences = preg_match_all('/[.!?\r]/', $text, $tmp );
+    $total_syllables = preg_match_all('/[aeiouy]/', $text, $tmp );
+
+    $reading_ease = 206.835 - 1.015 * ($total_words/$total_sentences) - 84.6 * ($total_syllables/$total_words);
+    $reading_grade = 0.39 * ($total_words/$total_sentences) + 11.8 * ($total_syllables/$total_words) - 15.59;
+
+    return $reading_ease;
   }
 }
 
