@@ -9,13 +9,16 @@ class Search {
   * Renders a seqrch result using the search.htm template.
   **/
   public function render_search($f3) {
+    // the search query is taken from $_GET['q']
     $q = $f3->get('GET.q');
 
+    // If a search query is given, make the API calls and sort articles by their score
     if ($q) {
       $this->_do_search($q);
       $this->_sort_by_score();
     }
 
+    // Send data to template
 		$f3->set('q', $q);
     $f3->set('articles', $this->articles);
 
@@ -105,10 +108,12 @@ class Search {
     $total_words = str_word_count($text);
     $total_sentences = preg_match_all('/[.!?\r]/', $text, $tmp );
     $total_syllables = preg_match_all('/[aeiouy]/', $text, $tmp );
-
-    $reading_ease = 206.835 - 1.015 * ($total_words/$total_sentences) - 84.6 * ($total_syllables/$total_words);
-    $reading_grade = 0.39 * ($total_words/$total_sentences) + 11.8 * ($total_syllables/$total_words) - 15.59;
-
+    if ($total_sentences && $total_words) {
+      $reading_ease = 206.835 - 1.015 * ($total_words/$total_sentences) - 84.6 * ($total_syllables/$total_words);
+      $reading_grade = 0.39 * ($total_words/$total_sentences) + 11.8 * ($total_syllables/$total_words) - 15.59;
+    } else {
+      return 0;
+    }
     return $reading_ease;
   }
 }
