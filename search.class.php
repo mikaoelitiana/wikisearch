@@ -1,7 +1,13 @@
 <?php
+/**
+* This class will handle search query and returning result or error for each query
+**/
 class Search {
   private $articles = [];
 
+  /**
+  * Renders a seqrch result using the search.htm template.
+  **/
   public function render_search($f3) {
     $q = $f3->get('GET.q');
 
@@ -17,6 +23,9 @@ class Search {
 		echo View::instance()->render('layout.htm');
   }
 
+  /**
+  * Makes an GET request to a give URL
+  **/
   private function _query($url) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -30,6 +39,9 @@ class Search {
     return json_decode($result);
   }
 
+  /**
+  * Query Wikipedia search API to find all categories
+  **/
   private function _do_search($q) {
     $url = "https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:$q&format=json&cmlimit=50&cmtype=page&iwurl";
 
@@ -43,6 +55,9 @@ class Search {
     $this->_get_extracts();
   }
 
+  /**
+  * Utility function to store articles in a page id keyd array
+  **/
   private function _get_pages_ids() {
     function _get_article_id($article) {
       return $article->pageid;
@@ -50,6 +65,9 @@ class Search {
     return array_map('_get_article_id', $this->articles);
   }
 
+  /**
+  * Query pages extract from Wikipedia API and store them in their respective article'
+  **/
   private function _get_extracts() {
     $ids = $this->_get_pages_ids();
 
@@ -63,7 +81,11 @@ class Search {
     }
   }
 
+  /*
+  * Sort articles using their score property
+  */
   private function _sort_by_score() {
+    // Utility function to compare score of 2 entry
     function cmp_scores($a, $b) {
       if ($a->score == $b->score) {
         return 0;
@@ -74,7 +96,12 @@ class Search {
     uasort($this->articles, 'cmp_scores');
   }
 
+  /*
+  * This function calculates the Flesch-Kincaid score of a given text and returns it's reading ease score'
+  * The code was inspired by https://sourceforge.net/projects/fleschkincaid
+  */
   private function _flesch_kincaid($text) {
+    // the formula details can be found at https://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests
     $total_words = str_word_count($text);
     $total_sentences = preg_match_all('/[.!?\r]/', $text, $tmp );
     $total_syllables = preg_match_all('/[aeiouy]/', $text, $tmp );
