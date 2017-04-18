@@ -19,11 +19,11 @@ class Search {
     }
 
     // Send data to template
-		$f3->set('q', $q);
+    $f3->set('q', $q);
     $f3->set('articles', $this->articles);
 
     $f3->set('content','search.htm');
-		echo View::instance()->render('layout.htm');
+    echo View::instance()->render('layout.htm');
   }
 
   /**
