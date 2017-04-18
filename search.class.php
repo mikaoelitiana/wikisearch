@@ -46,15 +46,17 @@ class Search {
   * Query Wikipedia search API to find all categories
   **/
   private function _do_search($q) {
+    // API url to get search results of articles in a category
     $url = "https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:$q&format=json&cmlimit=50&cmtype=page&iwurl";
-
+    // call the API url and get the article list
+    // The articles are then stored in a key-value array where the pageid is the key
     $this->articles = array_reduce(
       $this->_query($url)->query->categorymembers,
       function ($all, $item) {
         $all[$item->pageid] = $item;
         return $all;
-      });
-
+      }, []);
+    // When page query is done, we try to get extracts for each article found
     $this->_get_extracts();
   }
 
@@ -72,15 +74,18 @@ class Search {
   * Query pages extract from Wikipedia API and store them in their respective article'
   **/
   private function _get_extracts() {
+    // Get id of pages to get their intrp extract
     $ids = $this->_get_pages_ids();
-
+    // API url to get extracts
     $url = "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&exsentences=10&explaintext&format=json&exlimit=50&pageids=" . implode("|", $ids);
-
+    // Make API request and get each pages if found
     $extracts = $this->_query($url)->query->pages;
-
-    foreach($extracts as $id => $content) {
-      $this->articles[$content->pageid]->extract = isset($content->extract) ? $content->extract : "";
-      $this->articles[$content->pageid]->score = isset($content->extract) && $content->extract ? $this->_flesch_kincaid($content->extract) : 0;
+    // If any extract found, assign them to their respective article using the id
+    if ($extracts) {
+      foreach($extracts as $id => $content) {
+        $this->articles[$content->pageid]->extract = isset($content->extract) ? $content->extract : "";
+        $this->articles[$content->pageid]->score = isset($content->extract) && $content->extract ? $this->_flesch_kincaid($content->extract) : 0;
+      }
     }
   }
 
